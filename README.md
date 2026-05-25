@@ -314,3 +314,95 @@ Torque strength multiplier in ABP model.
 ---
 
 This simulation framework allows systematic exploration of light-controlled collective behavior in motile unicellular algae across density regimes, interaction strengths, and adaptive response models.
+
+
+# Generation of illumination and tumbling rate maps
+
+The script `ill_maker.py` generates spatial maps for simulations starting from **experimental illumination maps**. The script produces:
+
+- An **illumination field map**
+- A **tumbling-rate field map**
+- Corresponding **parameter configuration files**
+
+The generated outputs can be used in particle-based simulations, active matter models, or light-driven dynamics studies.
+
+---
+
+# Features
+
+- Load experimental energy density maps
+- Generate illumination maps from experimental data
+- Generate tumbling-rate maps coupled to illumination
+- Support for multiple illumination profiles:
+  - Ring illumination
+  - Gaussian illumination
+  - Linear illumination
+  - Large-ring illumination
+- Optional conversion to an S-model representation
+- Adjustable simulation intensity independent of experimental intensity
+- Automatic parameter export
+
+# Parameters
+
+The script is controlled through a set of user-defined parameters that specify the illumination type, scaling, input/output paths, and map conversion options.
+
+```python
+# Experimental illumination intensity (ring profile)
+intensity = 610
+
+# Intensity used for the generated simulation map
+# Can differ from the experimental intensity
+newint = 610
+
+# Use Gaussian illumination profile
+gaussian = False
+
+# Symmetrize the illumination map
+# Currently unused
+symmetrized = False
+
+# Generate illumination maps for the S-model
+Smodel = False
+
+# Conversion factor from standard units to S-model units
+factor = 1e6 * 0.2517
+
+# Use linear illumination profile
+linear = False
+
+# Use large-ring experimental illumination profile
+large = True
+
+# Pixel size in micrometers
+pix = 1.041667
+
+# Input experimental illumination map folder
+inputname = "inputSimulations//radialEnergyDensityMap"
+
+# Output folder for generated illumination map
+outputnamei = "tbr_fields//ill_map"
+
+# Output folder for generated tumbling-rate map
+outputnamet = "tbr_fields//tbr_map"
+
+# Preserve peak normalization between maps (instead of overall intensity)
+samepeak = False
+
+# Additional normalization parameter
+# Currently unused
+normalisationPower = 0
+
+---
+
+# Repository Structure
+
+```text
+.
+├── inputSimulations/
+│   └── radialEnergyDensityMap*
+│
+├── tbr_fields/
+│   ├── ill_map*
+│   └── tbr_map*
+│
+└── generate_maps.py
