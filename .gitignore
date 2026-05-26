@@ -4,16 +4,22 @@ figs/**
 analysed_data/**
 video/**
 analysis/**
-inputSimulations/**
 snaps/**
 tbr_fields/**
 *.sh
 *.dat
-*.py
 *.out
 *.dSYM
 *.png
 Clamidomoni
+
+#useless .py
+poisson_test.py
+radializer.py
+tumble_ori.py
+ill_plotter.py
+dist_maker.py
+Frame.py
 
 **/.DS_Store
 

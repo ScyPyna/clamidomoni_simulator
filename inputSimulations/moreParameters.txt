@@ -1,0 +1,28 @@
+###############################################################
+#comment on the separate files about the tumbling vs Intensity#
+###############################################################
+most of the points are taken doing the experiments with the LED, therefore in absence of gradient.
+The latter two are from the maximum tumbling value of the ring illumination at 7µW and 180µW.
+The values of energy density associated to these latter two points were taken by using ringCharacterisation.py, where the standard illumination image and the fluorescent one are merged to get an idea of the shape of both the peak and the tails. This might not be super quantitative accurate, we could also think to use only the point with the LED and interpolate the rest.
+
+
+###################################
+#others parameters about the algae#
+###################################
+speed = 100 µm/s
+size = 10 µm
+density fraction of algae = I would just take the average number of particles from a given N_dist
+interaction: we should compare i) no interaction; 2) hard body
+simulation size = also this information is in the video/images. Then you can make it squared of course.
+illuminationProfile = I created (always from ringCharaterisation.py) the averaged radial profiles for both Gaussian and ring-shaped. Different intensity of the laser are basically just the same but renormalised 
+
+#####################
+#what should we test#
+#####################
+1) just having tau(I)
+2) having tau(I, grad(I))
+are both ingredients necessary to see the accumulation we see inside the ring? 
+Is the presence of an interaction necessary?
+
+
+
