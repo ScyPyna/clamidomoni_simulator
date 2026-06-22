@@ -1,0 +1,53 @@
+part_diam : 10.0  #in microns
+active_speed : 50.0 # in micron/second
+kBT : 4.141947 #in SI and microns, multiplied by 1e9
+eta : 1.0 #in SI and microns, multiplied by 1e9  #Should be 1 for water!, 2.1 for water/lutidine
+sub_dist : .5 #in particle diameters, this determines how far a particle is from the substrate
+dt : 0.0001 #in s - if needed keep 9 decimals
+NperCore : 1 #the total number of simulations performed is NperCore*(number of cores)
+power_input : 610 #chosen average input power for the tumbling map
+HOMOGENEOUS : 0 #1 for a homogeneous map ##note: the map needs to be in the format: mot_fields//mot_field_0_"parameters" where "parameters" are _hmg/_sp_gsx, _gaus, _exp, _multi, _hd
+GAUSSIAN : 0 #1 for a gaussian map
+LARGE : 1 #1 for a large ring
+LINEAR : 0 #1 for a gaussian map
+SYMMETRIZED : 0 #1 for a map symmetric wrt of the ring maximum
+EXPERIMENT : 0 #1 for an experimental map
+SAME_PEAK : 0 #1 for same height peak for both large and thin ring. 0 for normalization in total intensity
+PBC : 1 #0 for hard wall, 1 for PBC
+PUNCTIFORM : 0 #0 for finite-size particle
+WCA : 1 #0 for Lennard-Jones, 1 for WCA
+NOCENTER : 400 #if not 0,no particles initialized in the center of the ring with this radius
+Nlevel : 18 #the number of total time steps is Nblock^Nlevel, for 1h choose 22 (single=21, multi=19), 18
+Nblock : 2
+rho : 0.02 #0.0001 #0.05 #for one particle #for 1 particle the map needs no tag, for systems with many particles you need the tag _multi and for systems with rho>20% you need further the tag _hd
+LJepsilon : 50 #500 #L-J energy depth in kBT #apparently at our high speeds we need a huge LJepsilon
+avg_tbr : 0 #if not used, please set this to 0
+INDEPENDENT : 0 #if 1, all interactive effects are removed, ie COLLISIONS, v_reduction and LJ/WCA
+COLLISIONS : 1 #0 if we don't want collisions to affect tumbling, 1 otherwise
+v_reduction : 1 #Do we have quorum sensing or not?
+upper_mem_thresh : 0 #intensity threshold at which the gradient state of the particle is reversed. if 0, nothing happens (normal : 3.22437696)
+lower_mem_thresh : 0 #intensity threshold at which the gradient state of the particle goes back (symm : 2.80192; normal : 3.0708352)
+time_mem : 160000 #timesteps over which the particles average their tumbling rates (set to 0 to deactivate)
+DELAY : 0 #if this is set to 1, instead of doing an average over the last time_mem steps, it just takes the oldest value (0 does nothing)
+fk : 0.0 #sigmoid width for the continuous taxis function f. Smaller than 0.01 should yield similar results to the case with no f. fk=0 removes f
+rec_jump: 0 #timestep interval at which particles are affected by light. For no jumps, set to 0 (or 1)
+TBR_I : 1 #1 if we want tumbling as a function of the intensity. If this is 0, set also avg_tbr!=0
+TBR_THETA : 1 #1 if we want tumbling as a function of the angle with the intensity gradient
+TBR_DIST : 0 #1 if we want effective tumbling as a function of the distance from the center. This directly changes the tbr map
+coll_tbr_rate : 5 #rate of tumbling whenever two particles are in collision range 
+grad_amplification : 15 # if we want the effect of the experimental gradient to be amplified - maximum is 15
+grad_decay_rate : 0.0 # if not 0, sets the exponential decay rate over time at which we want the effect of gradient to decay 
+grad_sign_thresh : 3.0708352 # if not 0, will set the effects of the gradient to reverse when tbr reach thresh old: 3.0708352 (new:2.6793461)
+threshold_std : 0 # if not 0, sets the grad_sign_thresh do be distributed on a gaussian with this standard deviation for each particle (this number is related to a normalized gaussian - suggested:.02-.1)
+threshold_decay_rate : 0.0 # if not 0, sets the exponential decay rate of the threshold as a function of time (1e-3 to 1e-4 makes sense). If value is negative it performs an "upward decay" until double the value of the threhsold-no exp increase
+grad_sign_dist : 0 # if not 0, it defines the distance within which the sign of the gradient is reversed
+grad_dependence : 0 # if not 0, will linearly link the dependence of the tumbling rate to the gradient absolute value, multiplied by this factor
+tbr_amplification : 1 # if we want the effect of the experimental intensity to be amplified - maximum is 3 (?)
+total_tbr_multiplier : 1.0 # generic multiplier that applies to all tumbling rates
+S_model : 0 # if we want to use the "S_model". This automatically disables time_mem, upper and lower mem thresholds, grad_sign_thresh and grad_sign_dist. 
+S_tau : 1.0 # decay time for S (seconds)
+S_gamma : 0.00005 # gamma parameter in S
+S_st : 0.1 # st parameter in S
+S_stot : 1.0 # stot parameter in S
+ABP_model : 0 # remove all that run-and-tumble nonsense and substitute it with shiny torque-based ABP
+ABP_torque_fac : 0.0 # factor applied to the torque in the ABP model
