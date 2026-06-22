@@ -1,0 +1,47 @@
+Device: cuda
+Campioni totali: 150
+Train: 105  Val: 22  Test: 23
+Parametri: 85,185
+Epoch   0 | loss_tr=0.0358 | loss_val=0.0036 | lr=1.00e-03
+Epoch  20 | loss_tr=0.0011 | loss_val=0.0022 | lr=9.73e-04
+Epoch  40 | loss_tr=0.0005 | loss_val=0.0016 | lr=9.00e-04
+Epoch  60 | loss_tr=0.0009 | loss_val=0.0005 | lr=7.88e-04
+Epoch  80 | loss_tr=0.0008 | loss_val=0.0003 | lr=6.47e-04
+Epoch 100 | loss_tr=0.0003 | loss_val=0.0013 | lr=4.92e-04
+Epoch 120 | loss_tr=0.0002 | loss_val=0.0008 | lr=3.38e-04
+Epoch 140 | loss_tr=0.0001 | loss_val=0.0011 | lr=2.00e-04
+Epoch 160 | loss_tr=0.0002 | loss_val=0.0011 | lr=9.09e-05
+Epoch 180 | loss_tr=0.0002 | loss_val=0.0013 | lr=2.21e-05
+Epoch 200 | loss_tr=0.0003 | loss_val=0.0015 | lr=6.17e-08
+Epoch 220 | loss_tr=0.0002 | loss_val=0.0016 | lr=2.70e-05
+Epoch 240 | loss_tr=0.0001 | loss_val=0.0017 | lr=1.00e-04
+Epoch 260 | loss_tr=0.0004 | loss_val=0.0021 | lr=2.12e-04
+Epoch 280 | loss_tr=0.0003 | loss_val=0.0017 | lr=3.53e-04
+
+── Risultati Test ──
+  τₘ vero: 0.5s  |  τₘ predetto: 0.67s  |  errore: 0.17s
+  τₘ vero: 1.0s  |  τₘ predetto: 0.80s  |  errore: 0.20s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.69s  |  errore: 0.31s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.49s  |  errore: 0.51s
+  τₘ vero: 0.5s  |  τₘ predetto: 0.67s  |  errore: 0.17s
+  τₘ vero: 12.0s  |  τₘ predetto: 11.91s  |  errore: 0.09s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.49s  |  errore: 0.51s
+  τₘ vero: 0.0s  |  τₘ predetto: 0.27s  |  errore: 0.27s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.69s  |  errore: 0.31s
+  τₘ vero: 6.0s  |  τₘ predetto: 5.70s  |  errore: 0.30s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.78s  |  errore: 0.22s
+  τₘ vero: 3.0s  |  τₘ predetto: 3.01s  |  errore: 0.01s
+  τₘ vero: 5.0s  |  τₘ predetto: 4.65s  |  errore: 0.35s
+  τₘ vero: 2.0s  |  τₘ predetto: 1.86s  |  errore: 0.14s
+  τₘ vero: 20.0s  |  τₘ predetto: 19.62s  |  errore: 0.38s
+  τₘ vero: 0.5s  |  τₘ predetto: 0.67s  |  errore: 0.17s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.49s  |  errore: 0.51s
+  τₘ vero: 1.0s  |  τₘ predetto: 0.80s  |  errore: 0.20s
+  τₘ vero: 20.0s  |  τₘ predetto: 19.62s  |  errore: 0.38s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.78s  |  errore: 0.22s
+  τₘ vero: 10.0s  |  τₘ predetto: 9.93s  |  errore: 0.07s
+  τₘ vero: 3.0s  |  τₘ predetto: 3.01s  |  errore: 0.01s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.78s  |  errore: 0.22s
+
+RMSE: 0.286 s
+Salvato dataset/training_history.png

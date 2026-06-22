@@ -1,0 +1,69 @@
+Device: cuda
+Campioni totali: 300
+Train: 210  Val: 45  Test: 45
+Parametri: 85,249
+Epoch   0 | loss_tr=0.0819 | loss_val=0.0094 | lr=1.00e-03
+Epoch  20 | loss_tr=0.0019 | loss_val=0.0029 | lr=9.73e-04
+Epoch  40 | loss_tr=0.0008 | loss_val=0.0017 | lr=9.00e-04
+Epoch  60 | loss_tr=0.0003 | loss_val=0.0029 | lr=7.88e-04
+Epoch  80 | loss_tr=0.0006 | loss_val=0.0020 | lr=6.47e-04
+Epoch 100 | loss_tr=0.0002 | loss_val=0.0023 | lr=4.92e-04
+Epoch 120 | loss_tr=0.0002 | loss_val=0.0028 | lr=3.38e-04
+Epoch 140 | loss_tr=0.0001 | loss_val=0.0031 | lr=2.00e-04
+Epoch 160 | loss_tr=0.0001 | loss_val=0.0028 | lr=9.09e-05
+Epoch 180 | loss_tr=0.0001 | loss_val=0.0026 | lr=2.21e-05
+Epoch 200 | loss_tr=0.0001 | loss_val=0.0027 | lr=6.17e-08
+Epoch 220 | loss_tr=0.0001 | loss_val=0.0026 | lr=2.70e-05
+Epoch 240 | loss_tr=0.0001 | loss_val=0.0028 | lr=1.00e-04
+Epoch 260 | loss_tr=0.0002 | loss_val=0.0032 | lr=2.12e-04
+Epoch 280 | loss_tr=0.0001 | loss_val=0.0033 | lr=3.53e-04
+
+── Risultati Test ──
+  τₘ vero: 4.0s  |  τₘ predetto: 3.99s  |  errore: 0.01s
+  τₘ vero: 14.0s  |  τₘ predetto: 14.62s  |  errore: 0.62s
+  τₘ vero: 2.0s  |  τₘ predetto: 1.92s  |  errore: 0.08s
+  τₘ vero: 16.0s  |  τₘ predetto: 16.79s  |  errore: 0.79s
+  τₘ vero: 12.0s  |  τₘ predetto: 10.87s  |  errore: 1.13s
+  τₘ vero: 3.0s  |  τₘ predetto: 2.97s  |  errore: 0.03s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.52s  |  errore: 0.48s
+  τₘ vero: 3.0s  |  τₘ predetto: 2.55s  |  errore: 0.45s
+  τₘ vero: 10.0s  |  τₘ predetto: 9.72s  |  errore: 0.28s
+  τₘ vero: 2.0s  |  τₘ predetto: 1.92s  |  errore: 0.08s
+  τₘ vero: 10.0s  |  τₘ predetto: 10.44s  |  errore: 0.44s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.86s  |  errore: 0.14s
+  τₘ vero: 6.0s  |  τₘ predetto: 5.81s  |  errore: 0.19s
+  τₘ vero: 6.0s  |  τₘ predetto: 5.92s  |  errore: 0.08s
+  τₘ vero: 3.0s  |  τₘ predetto: 2.55s  |  errore: 0.45s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.52s  |  errore: 0.48s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.52s  |  errore: 0.48s
+  τₘ vero: 1.0s  |  τₘ predetto: 0.69s  |  errore: 0.31s
+  τₘ vero: 12.0s  |  τₘ predetto: 12.39s  |  errore: 0.39s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.86s  |  errore: 0.14s
+  τₘ vero: 12.0s  |  τₘ predetto: 12.39s  |  errore: 0.39s
+  τₘ vero: 10.0s  |  τₘ predetto: 10.44s  |  errore: 0.44s
+  τₘ vero: 16.0s  |  τₘ predetto: 15.52s  |  errore: 0.48s
+  τₘ vero: 14.0s  |  τₘ predetto: 14.62s  |  errore: 0.62s
+  τₘ vero: 2.0s  |  τₘ predetto: 1.41s  |  errore: 0.59s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.56s  |  errore: 0.44s
+  τₘ vero: 1.0s  |  τₘ predetto: 0.71s  |  errore: 0.29s
+  τₘ vero: 10.0s  |  τₘ predetto: 10.44s  |  errore: 0.44s
+  τₘ vero: 0.5s  |  τₘ predetto: 0.51s  |  errore: 0.01s
+  τₘ vero: 14.0s  |  τₘ predetto: 14.49s  |  errore: 0.49s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.56s  |  errore: 0.44s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.33s  |  errore: 0.67s
+  τₘ vero: 6.0s  |  τₘ predetto: 5.81s  |  errore: 0.19s
+  τₘ vero: 0.0s  |  τₘ predetto: 0.31s  |  errore: 0.31s
+  τₘ vero: 3.0s  |  τₘ predetto: 2.97s  |  errore: 0.03s
+  τₘ vero: 2.0s  |  τₘ predetto: 1.92s  |  errore: 0.08s
+  τₘ vero: 18.0s  |  τₘ predetto: 18.38s  |  errore: 0.38s
+  τₘ vero: 0.5s  |  τₘ predetto: 0.76s  |  errore: 0.26s
+  τₘ vero: 8.0s  |  τₘ predetto: 7.86s  |  errore: 0.14s
+  τₘ vero: 1.0s  |  τₘ predetto: 0.71s  |  errore: 0.29s
+  τₘ vero: 12.0s  |  τₘ predetto: 12.39s  |  errore: 0.39s
+  τₘ vero: 20.0s  |  τₘ predetto: 19.55s  |  errore: 0.45s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.99s  |  errore: 0.01s
+  τₘ vero: 0.5s  |  τₘ predetto: 0.51s  |  errore: 0.01s
+  τₘ vero: 4.0s  |  τₘ predetto: 3.99s  |  errore: 0.01s
+
+RMSE: 0.407 s
+Salvato dataset/training_history.png
