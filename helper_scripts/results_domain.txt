@@ -1,0 +1,115 @@
+Device: cuda
+Sintetico: 600 campioni  |  Reale: 19 campioni
+Train: 420  Val: 90  Test: 90
+Parametri: 85,249
+Pesi inizializzati da best_model_all.pt
+Epoch   0 | sup=0.00127 | phys=10.19787 | val=0.00086 | lr=5.00e-04
+Epoch  20 | sup=0.00046 | phys=10.22330 | val=0.00118 | lr=4.94e-04
+Epoch  40 | sup=0.00026 | phys=10.49379 | val=0.00196 | lr=4.77e-04
+Epoch  60 | sup=0.00031 | phys=10.37273 | val=0.00158 | lr=4.51e-04
+Epoch  80 | sup=0.00028 | phys=10.07965 | val=0.00189 | lr=4.15e-04
+Epoch 100 | sup=0.00024 | phys=10.36835 | val=0.00217 | lr=3.73e-04
+Epoch 120 | sup=0.00015 | phys=10.43215 | val=0.00217 | lr=3.25e-04
+Epoch 140 | sup=0.00013 | phys=10.33072 | val=0.00289 | lr=2.74e-04
+Epoch 160 | sup=0.00010 | phys=10.32097 | val=0.00246 | lr=2.21e-04
+Epoch 180 | sup=0.00008 | phys=10.29784 | val=0.00243 | lr=1.70e-04
+Epoch 200 | sup=0.00005 | phys=10.23018 | val=0.00234 | lr=1.23e-04
+Epoch 220 | sup=0.00006 | phys=10.35601 | val=0.00258 | lr=8.08e-05
+Epoch 240 | sup=0.00006 | phys=10.23996 | val=0.00251 | lr=4.62e-05
+Epoch 260 | sup=0.00004 | phys=10.46951 | val=0.00243 | lr=2.06e-05
+Epoch 280 | sup=0.00006 | phys=10.27920 | val=0.00243 | lr=4.93e-06
+
+── Risultati Test ──
+  τₘ vero: 20.0s  |  predetto: 19.59s  |  errore: 0.41s
+  τₘ vero: 6.0s  |  predetto: 6.15s  |  errore: 0.15s
+  τₘ vero: 5.0s  |  predetto: 5.05s  |  errore: 0.05s
+  τₘ vero: 3.0s  |  predetto: 2.92s  |  errore: 0.08s
+  τₘ vero: 14.0s  |  predetto: 13.88s  |  errore: 0.12s
+  τₘ vero: 6.0s  |  predetto: 5.95s  |  errore: 0.05s
+  τₘ vero: 18.0s  |  predetto: 18.54s  |  errore: 0.54s
+  τₘ vero: 1.0s  |  predetto: 1.20s  |  errore: 0.20s
+  τₘ vero: 0.5s  |  predetto: 0.35s  |  errore: 0.15s
+  τₘ vero: 6.0s  |  predetto: 6.00s  |  errore: 0.00s
+  τₘ vero: 20.0s  |  predetto: 19.72s  |  errore: 0.28s
+  τₘ vero: 18.0s  |  predetto: 18.54s  |  errore: 0.54s
+  τₘ vero: 10.0s  |  predetto: 10.01s  |  errore: 0.01s
+  τₘ vero: 0.0s  |  predetto: 0.03s  |  errore: 0.03s
+  τₘ vero: 14.0s  |  predetto: 14.14s  |  errore: 0.14s
+  τₘ vero: 14.0s  |  predetto: 13.88s  |  errore: 0.12s
+  τₘ vero: 20.0s  |  predetto: 19.59s  |  errore: 0.41s
+  τₘ vero: 12.0s  |  predetto: 11.79s  |  errore: 0.21s
+  τₘ vero: 18.0s  |  predetto: 17.93s  |  errore: 0.07s
+  τₘ vero: 16.0s  |  predetto: 15.93s  |  errore: 0.07s
+  τₘ vero: 12.0s  |  predetto: 12.07s  |  errore: 0.07s
+  τₘ vero: 8.0s  |  predetto: 7.82s  |  errore: 0.18s
+  τₘ vero: 4.0s  |  predetto: 4.74s  |  errore: 0.74s
+  τₘ vero: 10.0s  |  predetto: 10.13s  |  errore: 0.13s
+  τₘ vero: 0.0s  |  predetto: 0.47s  |  errore: 0.47s
+  τₘ vero: 8.0s  |  predetto: 7.96s  |  errore: 0.04s
+  τₘ vero: 5.0s  |  predetto: 5.32s  |  errore: 0.32s
+  τₘ vero: 16.0s  |  predetto: 15.54s  |  errore: 0.46s
+  τₘ vero: 10.0s  |  predetto: 9.93s  |  errore: 0.07s
+  τₘ vero: 4.0s  |  predetto: 4.39s  |  errore: 0.39s
+  τₘ vero: 1.0s  |  predetto: 1.20s  |  errore: 0.20s
+  τₘ vero: 4.0s  |  predetto: 4.09s  |  errore: 0.09s
+  τₘ vero: 2.0s  |  predetto: 2.06s  |  errore: 0.06s
+  τₘ vero: 0.0s  |  predetto: 0.15s  |  errore: 0.15s
+  τₘ vero: 4.0s  |  predetto: 4.58s  |  errore: 0.58s
+  τₘ vero: 2.0s  |  predetto: 1.47s  |  errore: 0.53s
+  τₘ vero: 16.0s  |  predetto: 15.54s  |  errore: 0.46s
+  τₘ vero: 12.0s  |  predetto: 11.34s  |  errore: 0.66s
+  τₘ vero: 16.0s  |  predetto: 15.55s  |  errore: 0.45s
+  τₘ vero: 0.5s  |  predetto: 0.49s  |  errore: 0.01s
+  τₘ vero: 0.0s  |  predetto: 0.47s  |  errore: 0.47s
+  τₘ vero: 18.0s  |  predetto: 17.60s  |  errore: 0.40s
+  τₘ vero: 3.0s  |  predetto: 2.62s  |  errore: 0.38s
+  τₘ vero: 12.0s  |  predetto: 12.07s  |  errore: 0.07s
+  τₘ vero: 14.0s  |  predetto: 13.72s  |  errore: 0.28s
+  τₘ vero: 3.0s  |  predetto: 3.80s  |  errore: 0.80s
+  τₘ vero: 10.0s  |  predetto: 10.01s  |  errore: 0.01s
+  τₘ vero: 10.0s  |  predetto: 9.84s  |  errore: 0.16s
+  τₘ vero: 2.0s  |  predetto: 2.06s  |  errore: 0.06s
+  τₘ vero: 0.5s  |  predetto: 0.51s  |  errore: 0.01s
+  τₘ vero: 10.0s  |  predetto: 9.93s  |  errore: 0.07s
+  τₘ vero: 8.0s  |  predetto: 7.96s  |  errore: 0.04s
+  τₘ vero: 12.0s  |  predetto: 11.87s  |  errore: 0.13s
+  τₘ vero: 6.0s  |  predetto: 6.00s  |  errore: 0.00s
+  τₘ vero: 16.0s  |  predetto: 15.55s  |  errore: 0.45s
+  τₘ vero: 3.0s  |  predetto: 3.80s  |  errore: 0.80s
+  τₘ vero: 5.0s  |  predetto: 5.26s  |  errore: 0.26s
+  τₘ vero: 12.0s  |  predetto: 11.79s  |  errore: 0.21s
+  τₘ vero: 1.0s  |  predetto: 1.20s  |  errore: 0.20s
+  τₘ vero: 18.0s  |  predetto: 17.87s  |  errore: 0.13s
+  τₘ vero: 16.0s  |  predetto: 15.93s  |  errore: 0.07s
+  τₘ vero: 1.0s  |  predetto: 1.20s  |  errore: 0.20s
+  τₘ vero: 5.0s  |  predetto: 5.26s  |  errore: 0.26s
+  τₘ vero: 4.0s  |  predetto: 4.74s  |  errore: 0.74s
+  τₘ vero: 1.0s  |  predetto: 0.36s  |  errore: 0.64s
+  τₘ vero: 10.0s  |  predetto: 9.84s  |  errore: 0.16s
+  τₘ vero: 0.0s  |  predetto: 0.47s  |  errore: 0.47s
+  τₘ vero: 10.0s  |  predetto: 9.93s  |  errore: 0.07s
+  τₘ vero: 0.5s  |  predetto: 0.51s  |  errore: 0.01s
+  τₘ vero: 14.0s  |  predetto: 13.89s  |  errore: 0.11s
+  τₘ vero: 2.0s  |  predetto: 2.06s  |  errore: 0.06s
+  τₘ vero: 5.0s  |  predetto: 5.05s  |  errore: 0.05s
+  τₘ vero: 14.0s  |  predetto: 13.88s  |  errore: 0.12s
+  τₘ vero: 14.0s  |  predetto: 13.72s  |  errore: 0.28s
+  τₘ vero: 0.0s  |  predetto: 0.22s  |  errore: 0.22s
+  τₘ vero: 6.0s  |  predetto: 5.95s  |  errore: 0.05s
+  τₘ vero: 3.0s  |  predetto: 2.62s  |  errore: 0.38s
+  τₘ vero: 20.0s  |  predetto: 19.59s  |  errore: 0.41s
+  τₘ vero: 2.0s  |  predetto: 1.47s  |  errore: 0.53s
+  τₘ vero: 0.0s  |  predetto: 0.47s  |  errore: 0.47s
+  τₘ vero: 12.0s  |  predetto: 12.07s  |  errore: 0.07s
+  τₘ vero: 18.0s  |  predetto: 17.93s  |  errore: 0.07s
+  τₘ vero: 10.0s  |  predetto: 10.13s  |  errore: 0.13s
+  τₘ vero: 0.5s  |  predetto: 0.35s  |  errore: 0.15s
+  τₘ vero: 1.0s  |  predetto: 0.36s  |  errore: 0.64s
+  τₘ vero: 20.0s  |  predetto: 19.58s  |  errore: 0.42s
+  τₘ vero: 4.0s  |  predetto: 4.09s  |  errore: 0.09s
+  τₘ vero: 0.5s  |  predetto: 0.51s  |  errore: 0.01s
+  τₘ vero: 6.0s  |  predetto: 5.96s  |  errore: 0.04s
+  τₘ vero: 4.0s  |  predetto: 4.09s  |  errore: 0.09s
+
+RMSE: 0.320 s
+Salvato dataset/training_history_domain.png
