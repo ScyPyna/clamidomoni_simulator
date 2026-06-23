@@ -122,3 +122,5 @@ target/
 .ipynb_checkpoints/
 
 
+*.npy
+dataset/
