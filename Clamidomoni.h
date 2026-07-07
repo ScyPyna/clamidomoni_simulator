@@ -20,6 +20,8 @@ struct parameters{
   double Ir;
   double part_diam;
   double active_speed;
+  double v_drift_x;
+  double v_drift_y;
   double kBT;
   double eta;
   double sub_dist;
@@ -208,6 +210,9 @@ struct parameters{
 
     if (rho>=1.0)
       type_name+="_hd";
+
+    if (v_drift_x!=0.0 || v_drift_y!=0.0)
+      type_name+="_vdx"+to_string(v_drift_x)+"_vdy"+to_string(v_drift_y);
 
     type_name+="_"+to_string(power_input)+"muW";
   }
@@ -1449,7 +1454,17 @@ struct simulation {
 
     //progression notice
     if (i%(par.Nsim/100)==0)
-      {cout << i/(par.Nsim/100) << "% completed" << endl;}
+    {
+      int pct = i/(par.Nsim/100);
+      int barWidth = 40;
+      int pos = barWidth*pct/100;
+      cout << "\r[";
+      for (int b=0; b<barWidth; b++)
+        cout << (b<pos ? '=' : (b==pos ? '>' : ' '));
+      cout << "] " << pct << "%" << std::flush;
+      if (pct>=100)
+        cout << endl;
+    }
 
     //cycle over all particles
     for(k=0;k<tbr.Npart;k++)
@@ -1467,8 +1482,8 @@ struct simulation {
       //part.f* are the forces calculated by interactions
       //par.gamma1 is the friction considering the particles slide on a surface
       //par.Bt = sqrt(2*D*dt)
-      dx=(part.v_red[k]*par.active_speed*cos(part.phi[k])+part.fx[k]/par.gamma1)*par.dt+norm_distribution(mt)*par.Bt;
-      dy=(part.v_red[k]*par.active_speed*sin(part.phi[k])+part.fy[k]/par.gamma1)*par.dt+norm_distribution(mt)*par.Bt;
+      dx=(part.v_red[k]*par.active_speed*cos(part.phi[k])+part.fx[k]/par.gamma1)*par.dt+norm_distribution(mt)*par.Bt+par.v_drift_x*par.dt;
+      dy=(part.v_red[k]*par.active_speed*sin(part.phi[k])+part.fy[k]/par.gamma1)*par.dt+norm_distribution(mt)*par.Bt+par.v_drift_y*par.dt;
 
       //if (k==0)
       //  cout << "density " << part.density[k] << " v_red " << part.v_red[k]*par.active_speed << " v_real " << sqrt(dx*dx+dy*dy)/par.dt << endl;

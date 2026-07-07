@@ -5,10 +5,10 @@ eta : 1.0 #in SI and microns, multiplied by 1e9  #Should be 1 for water!, 2.1 fo
 sub_dist : .5 #in particle diameters, this determines how far a particle is from the substrate
 dt : 0.0001 #in s - if needed keep 9 decimals
 NperCore : 1 #the total number of simulations performed is NperCore*(number of cores)
-power_input : 610 #chosen average input power for the tumbling map
+power_input : 180  #chosen average input power for the tumbling map
 HOMOGENEOUS : 0 #1 for a homogeneous map ##note: the map needs to be in the format: mot_fields//mot_field_0_"parameters" where "parameters" are _hmg/_sp_gsx, _gaus, _exp, _multi, _hd
 GAUSSIAN : 0 #1 for a gaussian map
-LARGE : 1 #1 for a large ring
+LARGE : 0 #1 for a large ring
 LINEAR : 0 #1 for a gaussian map
 SYMMETRIZED : 0 #1 for a map symmetric wrt of the ring maximum
 EXPERIMENT : 0 #1 for an experimental map
@@ -16,7 +16,7 @@ SAME_PEAK : 0 #1 for same height peak for both large and thin ring. 0 for normal
 PBC : 1 #0 for hard wall, 1 for PBC
 PUNCTIFORM : 0 #0 for finite-size particle
 WCA : 1 #0 for Lennard-Jones, 1 for WCA
-NOCENTER : 400 #if not 0,no particles initialized in the center of the ring with this radius
+NOCENTER : 300 #if not 0,no particles initialized in the center of the ring with this radius
 Nlevel : 18 #the number of total time steps is Nblock^Nlevel, for 1h choose 22 (single=21, multi=19), 18
 Nblock : 2
 rho : 0.02 #0.0001 #0.05 #for one particle #for 1 particle the map needs no tag, for systems with many particles you need the tag _multi and for systems with rho>20% you need further the tag _hd
@@ -51,3 +51,5 @@ S_st : 0.1 # st parameter in S
 S_stot : 1.0 # stot parameter in S
 ABP_model : 0 # remove all that run-and-tumble nonsense and substitute it with shiny torque-based ABP
 ABP_torque_fac : 0.0 # factor applied to the torque in the ABP model
+v_drift_x : 0.0  #drift velocity along x in µm/s
+v_drift_y : 0.0  #drift velocity along y in µm/s

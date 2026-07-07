@@ -71,6 +71,8 @@ parameters read_parameters() //reads parameters
 
   config["part_diam"] >> ret.part_diam;
   config["active_speed"] >> ret.active_speed;
+  config["v_drift_x"] >> ret.v_drift_x;
+  config["v_drift_y"] >> ret.v_drift_y;
   config["kBT"] >> ret.kBT;
   config["eta"] >> ret.eta;
   config["sub_dist"] >> ret.sub_dist;
@@ -162,6 +164,7 @@ int main(int argc, char* argv[]) //main
     parameters par;
     
     par=read_parameters();
+    int seed_offset = (argc > 1) ? std::atoi(argv[1]) : 0;
     
     //kBT=1.380649*3e-9;//thermal energy at 300K in kg*mum^2/s^2
     //eta=1e-9;//water viscosity in kg/(mum*s)
@@ -208,7 +211,7 @@ int main(int argc, char* argv[]) //main
     {
       for (i=0; i<processor_count; i++)
       {
-        sim_number=i+j*processor_count;
+        sim_number=i+j*processor_count+seed_offset*10000;
         simvec[i]=make_simulation(par, tbr_all, ill_all, sim_number);
         threads[i]=thread(multi_particle_simulation,std::ref(simvec[i])); //normally references could be simply called with "sum", in a thread we also need "std::ref"
       }
@@ -223,9 +226,9 @@ int main(int argc, char* argv[]) //main
       }
       for (i=0; i<processor_count; i++)
       {
-        sim_number=i+j*processor_count;
+        sim_number=i+j*processor_count+seed_offset*10000;
 
-        if (sim_number<N) //prints logs
+        if (i+j*processor_count<N) //prints logs
         {
           simvec[i].print_log();
           simvec[i].print_quantities();

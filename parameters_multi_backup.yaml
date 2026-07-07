@@ -51,3 +51,5 @@ S_st : 0.1 # st parameter in S
 S_stot : 1.0 # stot parameter in S
 ABP_model : 0 # remove all that run-and-tumble nonsense and substitute it with shiny torque-based ABP
 ABP_torque_fac : 0.0 # factor applied to the torque in the ABP model
+v_drift_x : 0.0  #drift velocity along x in µm/s
+v_drift_y : 0.0  #drift velocity along y in µm/s
