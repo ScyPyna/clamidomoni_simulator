@@ -51,3 +51,9 @@ S_st : 0.1 # st parameter in S
 S_stot : 1.0 # stot parameter in S
 ABP_model : 0 # remove all that run-and-tumble nonsense and substitute it with shiny torque-based ABP
 ABP_torque_fac : 0.0 # factor applied to the torque in the ABP model
+PULSED : 0 # 1 to switch the light on and off periodically, 0 to keep it always on
+light_on_time : 10.0 # duration in seconds of each "light on" interval (only used if PULSED=1)
+light_off_time : 10.0 # duration in seconds of each "light off" interval (only used if PULSED=1)
+pulse_start_time : 0.0 # seconds held in the starting state before the on/off cycling begins (0 to start cycling immediately)
+LIGHT_START_OFF : 0 # 1 to begin the cycle in the dark, 0 to begin it in the light
+dark_tbr : 1.75 # tumbling rate (1/s) while the light is off, ie the one measured at zero energy density. A negative value takes instead the minimum of the tumbling map

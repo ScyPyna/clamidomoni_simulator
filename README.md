@@ -90,6 +90,8 @@ Tags:
 * `_symm`
 * `_samepeak`
 
+To switch this field on and off periodically in time, see **§14 Pulsed Illumination**.
+
 ---
 
 # 4. Boundary Conditions
@@ -290,6 +292,74 @@ Torque strength multiplier in ABP model.
 
 ---
 
+# 14. Pulsed Illumination (light on / light off)
+
+Switches the light field on and off periodically, with intervals chosen from input.
+While the light is **on**, particles read the tumbling-rate map as usual.
+While the light is **off**, the light field is simply absent: every particle sees a
+uniform tumbling rate `dark_tbr` and a **zero gradient**, so `TBR_THETA` has nothing to
+act on. Nothing else changes — swimming speed, collisions and the WCA/LJ interactions
+are unaffected by the light.
+
+Everything downstream keeps working during the dark phases: `time_mem` goes on averaging
+(over the dark value), the `grad_sign_thresh` state keeps being updated, and in the
+S-model the illumination seen by the particle drops to zero so `S` relaxes with `S_tau`.
+
+### `PULSED : 0`
+
+* `0` → light permanently on (identical to the previous behaviour)
+* `1` → periodic on/off cycling
+
+### `light_on_time : 10.0`
+
+Duration in **seconds** of each illuminated interval.
+
+### `light_off_time : 10.0`
+
+Duration in **seconds** of each dark interval.
+
+Both are converted to timesteps through `dt`; an interval shorter than `dt` is reported
+as a warning and never fires.
+
+### `pulse_start_time : 0.0`
+
+Seconds held in the starting state before the cycling begins, e.g. to let the system
+equilibrate under constant light. `0` starts the cycling immediately.
+
+### `LIGHT_START_OFF : 0`
+
+* `0` → the cycle (and the initial hold) starts in the light
+* `1` → it starts in the dark
+
+### `dark_tbr : 1.75`
+
+Tumbling rate in **1/s** during the dark phases. The default `1.75` is the experimental
+value at zero energy density in `inputSimulations//tumblingVsEnergyDensity.txt`, i.e. the
+value the map itself takes far away from the illuminated region. A **negative** value
+makes the code use the minimum of the loaded tumbling map instead. If
+`tbr_amplification != 1`, this rate is amplified exactly like the map is.
+
+### Output
+
+Log files gain a `_puls<on>on<off>off` tag, so pulsed runs never overwrite continuous
+ones, and an **eighth column** holding the state of the light (`1` on, `0` off) at each
+logged time. The first seven columns are unchanged.
+
+The map on disk is *not* affected by pulsing: the same `tbr_fields//tbr_map*` files are
+used, and `ill_maker.py` needs no change.
+
+### Interaction with other switches
+
+* `TBR_I : 0` makes the tumbling rate independent of the map, so pulsing then only acts
+  through the S-model. Use `TBR_I : 1` for pulsing to affect run-and-tumble.
+* `rec_jump > 0` means particles only look at the light every `rec_jump` steps, so the
+  switching they perceive is sampled at that rate. Keep `rec_jump` well below
+  `light_on_time/dt` and `light_off_time/dt`.
+* `COLLISIONS : 1` still forces `coll_tbr_rate` on colliding particles during the dark
+  phases: collisions do not depend on the light.
+
+---
+
 # Summary of Modeling Modes
 
 | Mode                       | Description                       |
@@ -301,6 +371,7 @@ Torque strength multiplier in ABP model.
 | Collision-induced tumbling | Extra tumbling on contact         |
 | S-model                    | Adaptive internal state model     |
 | ABP model                  | Continuous torque-based steering  |
+| Pulsed light               | Periodic on/off illumination      |
 
 ---
 

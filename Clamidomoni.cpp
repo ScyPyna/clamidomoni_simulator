@@ -55,6 +55,12 @@ averaging_data make_averaging_data(parameters par, string name) //creates observ
   return ret;
 }
 
+template <typename T> void read_optional(ryml::NodeRef config, const char* key, T &value) //reads a parameter only if the yaml file defines it, so that older parameter files keep working
+{
+  if (config.has_child(ryml::to_csubstr(key)))
+    config[ryml::to_csubstr(key)] >> value;
+}
+
 parameters read_parameters() //reads parameters
 {
   std::ifstream config_file("parameters_multi.yaml");
@@ -123,6 +129,35 @@ parameters read_parameters() //reads parameters
   config["ABP_model"] >> ret.ABP_model;
   config["ABP_torque_fac"] >> ret.ABP_torque_fac;
 
+  //pulsed illumination: defaults keep the light permanently on
+  ret.PULSED=0;
+  ret.light_on_time=0.0;
+  ret.light_off_time=0.0;
+  ret.pulse_start_time=0.0;
+  ret.LIGHT_START_OFF=0;
+  ret.dark_tbr=1.75;
+  ret.seed_offset=0;
+  read_optional(config, "seed_offset", ret.seed_offset);
+  read_optional(config, "PULSED", ret.PULSED);
+  read_optional(config, "light_on_time", ret.light_on_time);
+  read_optional(config, "light_off_time", ret.light_off_time);
+  read_optional(config, "pulse_start_time", ret.pulse_start_time);
+  read_optional(config, "LIGHT_START_OFF", ret.LIGHT_START_OFF);
+  read_optional(config, "dark_tbr", ret.dark_tbr);
+  ret.print_skip_exp=0; //0 keeps the default logging interval
+  read_optional(config, "print_skip_exp", ret.print_skip_exp);
+  //modulated light: the intensity map is multiplied by A(t), read from modulation.txt
+  ret.MODULATED=0;
+  ret.modulation_id=0;
+  ret.modulation_update=0.1;
+  ret.t_stop=0.0; //0 keeps Nblock^Nlevel steps
+  ret.log_interval=0.0; //0 keeps print_skip_exp or the default
+  read_optional(config, "MODULATED", ret.MODULATED);
+  read_optional(config, "modulation_id", ret.modulation_id);
+  read_optional(config, "modulation_update", ret.modulation_update);
+  read_optional(config, "t_stop", ret.t_stop);
+  read_optional(config, "log_interval", ret.log_interval);
+
   ret.update_parameters();
 
   return ret;
@@ -133,7 +168,7 @@ simulation make_simulation(parameters par, tumbles tbr_all, tumbles ill_all, int
 {
   simulation ret;
   mt19937_64 mt;
-  mt.seed(sim_number);
+  mt.seed(par.seed_offset+sim_number); //sim_number alone would also be the index used to average the moments, so the seed is shifted separately
   normal_distribution<double> norm_distribution(0.0,1.0);
   uniform_real_distribution<double> uni_distribution(0.0,1.0);
   //cout << uni_distribution(mt) <<endl;
@@ -199,6 +234,8 @@ int main(int argc, char* argv[]) //main
     tbr_all.sim_number=0;
     tbr_all.par=par;
     tbr_all.read_field(0);
+    if (par.MODULATED>0)
+      tbr_all.load_modulation();
 
     ill_all.sim_number=0;
     ill_all.par=par;

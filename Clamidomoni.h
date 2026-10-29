@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <complex>
+#include <algorithm>
 
 #define PI  3.1415926
 
@@ -88,9 +89,40 @@ struct parameters{
   double nocenter_rad;
   int ABP_model;
   double ABP_torque_fac;
-  
+  int seed_offset;
+  int PULSED;
+  int LIGHT_START_OFF;
+  double light_on_time;
+  double light_off_time;
+  double pulse_start_time;
+  double dark_tbr;
+  int print_skip_exp;
+  int MODULATED;
+  int modulation_id;
+  double modulation_update;
+  double t_stop;
+  double log_interval;
+  long long modulation_update_steps;
+  long long pulse_on_steps;
+  long long pulse_off_steps;
+  long long pulse_period_steps;
+  long long pulse_start_steps;
+
 
   std::string type_name;
+
+  int light_on(long long time_step) //1 if the light is on at this timestep, 0 if it is off
+  {
+    long long phase;
+    if (PULSED<=0)
+      return 1;
+    if (time_step<pulse_start_steps) //initial hold in the starting state
+      return (LIGHT_START_OFF>0)?0:1;
+    phase=(time_step-pulse_start_steps)%pulse_period_steps;
+    if (LIGHT_START_OFF>0)
+      return (phase<pulse_off_steps)?0:1;
+    return (phase<pulse_on_steps)?1:0;
+  }
 
   void print_parameters(std::string filename) //prints parameters
   {
@@ -102,7 +134,11 @@ struct parameters{
     file_out << " " << grad_amplification << " " << tbr_amplification << " " << coll_tbr_rate << " " << TBR_DIST << " " << v_reduction << " " << grad_sign_thresh; 
     file_out << " " << grad_dependence << " " << Qm_cutoff << " " << grad_sign_dist << " " << LINEAR << " " << upper_mem_thresh << " " << lower_mem_thresh << " " << SYMMETRIZED << " " << time_mem;
     file_out << " " << S_model << " " << S_tau << " " << S_gamma << " " << S_st << " " << S_stot << " " << INDEPENDENT << " " << LARGE << " " << NOCENTER << " " << total_tbr_multiplier;
-    file_out << " " << rec_jump << " " << threshold_std << " " << fk << " " << DELAY << " " << threshold_decay_rate << " " << ABP_model << " " << ABP_torque_fac << " " << grad_decay_rate << " " << SAME_PEAK << endl;
+    file_out << " " << rec_jump << " " << threshold_std << " " << fk << " " << DELAY << " " << threshold_decay_rate << " " << ABP_model << " " << ABP_torque_fac << " " << grad_decay_rate << " " << SAME_PEAK;
+    file_out << " " << PULSED << " " << light_on_time << " " << light_off_time << " " << pulse_start_time << " " << LIGHT_START_OFF << " " << dark_tbr << " " << seed_offset;
+    if (MODULATED>0 || t_stop>0 || log_interval>0) //only appended when used, so the header of older-style runs is unchanged
+      file_out << " " << MODULATED << " " << modulation_id << " " << modulation_update << " " << t_stop << " " << log_interval;
+    file_out << endl;
     file_out.close();
   }
 
@@ -131,6 +167,33 @@ struct parameters{
     Br=sqrt(2*D_r*dt);
 
     Nsim=pow(Nblock,Nlevel);
+    if (t_stop>0) //stop at an arbitrary time instead of Nblock^Nlevel steps
+      Nsim=llround(t_stop/dt);
+
+    if (MODULATED>0)
+    {
+      if (PULSED>0 || TBR_DIST>0 || S_model>0 || HOMOGENEOUS>0)
+      {
+        cout << "Error: MODULATED cannot be combined with PULSED, TBR_DIST, S_model or HOMOGENEOUS" << endl;
+        exit(1);
+      }
+      modulation_update_steps=max(1LL,llround(modulation_update/dt));
+    }
+
+    pulse_on_steps=llround(light_on_time/dt);
+    pulse_off_steps=llround(light_off_time/dt);
+    pulse_start_steps=llround(pulse_start_time/dt);
+    pulse_period_steps=pulse_on_steps+pulse_off_steps;
+
+    if (PULSED>0 && pulse_period_steps<=0) //nothing to pulse: an empty period would be a division by zero
+    {
+      cout << "Pulsed light asked with a zero-length cycle: pulsing disabled" << endl;
+      PULSED=0;
+    }
+    if (PULSED>0 && pulse_off_steps<=0)
+      cout << "Warning: light_off_time is shorter than dt, the light never switches off" << endl;
+    if (PULSED>0 && pulse_on_steps<=0)
+      cout << "Warning: light_on_time is shorter than dt, the light never switches on" << endl;
 
     Qm_cutoff=0;
     rho0=0;
@@ -144,7 +207,32 @@ struct parameters{
     if (HOMOGENEOUS>0 && GAUSSIAN==0 && EXPERIMENT==0 && LINEAR==0 && SYMMETRIZED==0 && LARGE==0) //if TRUE_HMG is 1, we skip the calculation of velocities and gradients
       TRUE_HMG=1;
        
-    print_skip=pow(Nblock,7+Nlevel-18);//pow(Nblock,7); 7 for a bigdt of 0.1
+    if (print_skip_exp>0) //log every Nblock^print_skip_exp steps instead of the default, which always gives 2048 timepoints
+    {
+      if (print_skip_exp>Nlevel)
+      {
+        cout << "Error: print_skip_exp cannot be larger than Nlevel" << endl;
+        exit(1);
+      }
+      print_skip=pow(Nblock,print_skip_exp);
+    }
+    else
+      print_skip=pow(Nblock,7+Nlevel-18);//pow(Nblock,7); 7 for a bigdt of 0.1
+
+    if (log_interval>0) //log every log_interval seconds, not tied to powers of Nblock
+    {
+      if (print_skip_exp>0)
+      {
+        cout << "Error: set either print_skip_exp or log_interval, not both" << endl;
+        exit(1);
+      }
+      print_skip=llround(log_interval/dt);
+    }
+    if (print_skip>0 && Nsim%print_skip!=0)
+    {
+      cout << "Error: the simulated time must be a multiple of the logging interval" << endl;
+      exit(1);
+    }
 
     if(WCA==0)
       cutoff_multiplier=5;
@@ -244,11 +332,89 @@ struct moment{
 
 struct tumbles {
   int sim_number, Nx, Ny, Npart, Ncellx, Ncelly, Nmaxpercell;
-  double avg_intensity, avg_tbr, Lx, Ly, pixel_size, rcellx, rcelly;
+  double avg_intensity, avg_tbr, Lx, Ly, pixel_size, rcellx, rcelly, dark_value;
   parameters par;
   vector<double> tbr_field_vector;
   vector<double> tbr_dist_field_vector;
+  //modulated light: raw intensity map, tumbling-vs-energy curve f_R and the A(t) series
+  vector<double> ill_raw;
+  vector<double> fR_energy, fR_tbr;
+  vector<double> mod_t, mod_A;
+  double current_A=1.0;
   //vector<vector<double>> mot_field;
+
+  double fR(double energy) //tumbling rate at a given energy density: linear interpolation, linear extrapolation at the ends (as scipy's slinear + extrapolate in ill_maker.py)
+  {
+    int n=fR_energy.size();
+    int j=upper_bound(fR_energy.begin(), fR_energy.end(), energy)-fR_energy.begin();
+    j=min(max(j,1),n-1);
+    return fR_tbr[j-1]+(fR_tbr[j]-fR_tbr[j-1])*(energy-fR_energy[j-1])/(fR_energy[j]-fR_energy[j-1]);
+  }
+
+  double modulation_at(double t) //A(t), linearly interpolated, held constant outside the given range
+  {
+    int n=mod_t.size();
+    if (t<=mod_t[0])
+      return mod_A[0];
+    if (t>=mod_t[n-1])
+      return mod_A[n-1];
+    int j=upper_bound(mod_t.begin(), mod_t.end(), t)-mod_t.begin();
+    return mod_A[j-1]+(mod_A[j]-mod_A[j-1])*(t-mod_t[j-1])/(mod_t[j]-mod_t[j-1]);
+  }
+
+  void apply_modulation(double A) //rebuilds the tumbling map for intensity A*I(r), with the same amplification as read_field
+  {
+    for (int i=0;i<Nx*Ny;i++)
+    {
+      tbr_field_vector[i]=avg_tbr+par.tbr_amplification*(fR(A*ill_raw[i])-avg_tbr);
+      if (tbr_field_vector[i]<0)
+        tbr_field_vector[i]=0;
+    }
+    current_A=A;
+  }
+
+  void load_modulation() //reads the intensity map, f_R and A(t); called once on the tumbling map
+  {
+    int R, C, i;
+    double p1, p2, p3, e, tb, t, A, maxdiff;
+    string line;
+
+    fstream illfile("tbr_fields//ill_map"+par.type_name+".dat");
+    ill_raw=read_matrix_tovector(illfile, R, C, p1, p2, p3);
+    if (R!=Nx || C!=Ny)
+    {
+      cout << "Error: intensity and tumbling maps have different sizes" << endl;
+      exit(1);
+    }
+
+    ifstream fRfile("tbr_fields//tumblingVsEnergyDensity.txt"); //columns: fit, mean tumbling rate, energy density; the maps use the mean
+    getline(fRfile, line);
+    while (fRfile >> p1 >> tb >> e)
+    {
+      fR_energy.push_back(e);
+      fR_tbr.push_back(tb);
+    }
+
+    ifstream modfile("modulation.txt"); //columns: time (s), A
+    while (modfile >> t >> A)
+    {
+      mod_t.push_back(t);
+      mod_A.push_back(A);
+    }
+    if (fR_energy.size()<2 || mod_t.size()<1)
+    {
+      cout << "Error: missing tbr_fields//tumblingVsEnergyDensity.txt or modulation.txt" << endl;
+      exit(1);
+    }
+
+    //consistency check: at A=1 the rebuilt map must be the stored one
+    maxdiff=0;
+    for (i=0;i<Nx*Ny;i++)
+      maxdiff=max(maxdiff,fabs(avg_tbr+par.tbr_amplification*(fR(ill_raw[i])-avg_tbr)-tbr_field_vector[i]));
+    cout << "Modulated light: " << mod_t.size() << " points of A(t), update every " << par.modulation_update << " s, max |f_R(I)-tbr map| = " << maxdiff << endl;
+
+    apply_modulation(modulation_at(0.0));
+  }
 
   void read_field(int illumination) //reads the motility field
   {
@@ -267,7 +433,10 @@ struct tumbles {
       pixel_size=1.041667/par.part_diam;
       Nx=1159; //965
       Ny=1159;
-      
+      dark_value=(par.dark_tbr>=0)?par.dark_tbr:par.avg_tbr;
+      if (illumination>0)
+        dark_value=0;
+
     }
     else
     {
@@ -288,6 +457,22 @@ struct tumbles {
         }
       }
 
+      //value the field takes while the light is off. The light being off means no illumination at
+      //all, so for the tbr map it is the tumbling rate measured in the dark and for the ill map it is
+      //zero. Both go through the same amplification as the map they replace.
+      if (illumination>0)
+        dark_value=avg_tbr+par.tbr_amplification*(0.0-avg_tbr);
+      else if (par.dark_tbr>=0)
+        dark_value=avg_tbr+par.tbr_amplification*(par.dark_tbr-avg_tbr);
+      else if (tbr_field_vector.size()>0) //negative dark_tbr: take the darkest point of the map
+        dark_value=*min_element(tbr_field_vector.begin(),tbr_field_vector.end());
+      else
+        dark_value=0;
+      if (dark_value<0)
+      {
+        cout << "Negative dark tumbling rate, setting it to 0" << endl;
+        dark_value=0;
+      }
 
       if (par.TBR_DIST>0)
       {
@@ -322,7 +507,9 @@ struct tumbles {
     rcellx=Lx/Ncellx;
     rcelly=Ly/Ncelly;
     Nmaxpercell=(par.larger_cutoff+1)*(par.larger_cutoff+1);
-    std::cout << Nx << " " << Ny << " " << avg_intensity << " " << avg_tbr << " " << pixel_size << " " << Npart << " " << rcellx << " " << rcelly << endl;// " " << mot_field[7][5] << 
+    std::cout << Nx << " " << Ny << " " << avg_intensity << " " << avg_tbr << " " << pixel_size << " " << Npart << " " << rcellx << " " << rcelly << endl;// " " << mot_field[7][5] <<
+    if (par.PULSED>0)
+      cout << "Pulsed light: " << par.light_on_time << " s on, " << par.light_off_time << " s off, field value while off = " << dark_value << endl;
   }
 
   void print_tbr_parameters(std::string filename) //prints parameters of the motility field
@@ -367,6 +554,7 @@ struct particle {
   valarray<double> trate_log;
   valarray<double> phi_log;
   valarray<double> state_log;
+  valarray<double> light_log;
   valarray<double> pot;
   valarray<double> vir;
 
@@ -380,6 +568,7 @@ struct particle {
   parameters par;
   tumbles tbr;
   tumbles ill;
+  long long light_slot=-1;
 
   void initialize_thresholds()
   {
@@ -583,10 +772,20 @@ struct particle {
     return (1.+smem*mem*sign_change_dist*par.grad_amplification*0.01887769*diff*grad_decay);//the one with 0.014 is the experimental one
   }
 
-  void compute_trates() //computation of tumbling rates
+  void compute_trates(int time_step) //computation of tumbling rates
   {
     int nx, ny, nxright, nxleft, nyup, nydown, xcells, ycells, i, j, k, counter, nxi, nyj, nxileft, nxiright, nyjdown, nyjup;
     double cell_dx, cell_dy, radius, trate_pot, tratex_fx, tratey_fy;
+    if (par.light_on(time_step)==0) //light off: uniform dark tumbling rate and no gradient anywhere
+    {
+      for(k=0;k<tbr.Npart;k++)
+      {
+        trate[k]=tbr.dark_value;
+        tratex[k]=0;
+        tratey[k]=0;
+      }
+      return;
+    }
     for(k=0;k<tbr.Npart;k++)
     {
       trate_pot=0;
@@ -716,10 +915,20 @@ struct particle {
     } 
   }
 
-  void compute_trates_dist() //computation of tumbling rates
+  void compute_trates_dist(int time_step) //computation of tumbling rates
   {
     int nx, ny, nxright, nxleft, nyup, nydown, xcells, ycells, i, j, k, counter, nxi, nyj, nxileft, nxiright, nyjdown, nyjup;
     double cell_dx, cell_dy, radius, trate_pot, tratex_fx, tratey_fy;
+    if (par.light_on(time_step)==0) //light off: uniform dark tumbling rate and no gradient anywhere
+    {
+      for(k=0;k<tbr.Npart;k++)
+      {
+        trate[k]=tbr.dark_value;
+        tratex[k]=0;
+        tratey[k]=0;
+      }
+      return;
+    }
     for(k=0;k<tbr.Npart;k++)
     {
       trate_pot=0;
@@ -849,10 +1058,18 @@ struct particle {
     } 
   }
 
-  void compute_illval() //computation of tumbling rates
+  void compute_illval(int time_step) //computation of the illumination seen by each particle
   {
     int nx, ny, nxright, nxleft, nyup, nydown, xcells, ycells, i, j, k, counter, nxi, nyj, nxileft, nxiright, nyjdown, nyjup;
     double cell_dx, cell_dy, radius, ill_pot;
+    if (par.light_on(time_step)==0) //light off: no illumination anywhere, S relaxes freely
+    {
+      for(k=0;k<ill.Npart;k++)
+      {
+        illval[k]=ill.dark_value;
+      }
+      return;
+    }
     for(k=0;k<ill.Npart;k++)
     {
       ill_pot=0;
@@ -1022,14 +1239,28 @@ struct particle {
 
   }
 
+  void update_light(int timestep) //modulated light: rebuild the tumbling map whenever a new update interval starts
+  {
+    long long slot;
+    if (par.MODULATED<=0)
+      return;
+    slot=timestep/par.modulation_update_steps;
+    if (slot!=light_slot)
+    {
+      tbr.apply_modulation(tbr.modulation_at(slot*par.modulation_update_steps*par.dt));
+      light_slot=slot;
+    }
+  }
+
   void tumbling_handler(int timestep)
   {
+    update_light(timestep);
     if (par.TBR_THETA==1 || par.TBR_I==1)
     {
       if (par.TBR_DIST==0)
-        compute_trates();
+        compute_trates(timestep);
       else
-        compute_trates_dist();
+        compute_trates_dist(timestep);
       if (par.time_mem>0)
       {
         if (par.DELAY==1)
@@ -1042,19 +1273,20 @@ struct particle {
       if (par.TBR_I==0)
         reset_trates();
       if (par.TBR_THETA==1)
-        compute_trates_theta(timestep); 
+        compute_trates_theta(timestep);
     }
     if (par.COLLISIONS==1)
       collision_trates();
-    
+
     if (par.S_model==1)
-      compute_illval();
+      compute_illval(timestep);
   }
 
   void torque_handler(int timestep)
   {
     double tnorm;
-    compute_trates();
+    update_light(timestep);
+    compute_trates(timestep);
 
     if (par.time_mem>0)
     {
@@ -1072,9 +1304,9 @@ struct particle {
       torque[k]=smem_state[k]*mem_state[k]*par.ABP_torque_fac*(cos(phi[k])*tratey[k]-sin(phi[k])*tratex[k]);// /tnorm
       //cout << torque[k] << endl;
     }
-    
+
     if (par.S_model==1)
-      compute_illval();
+      compute_illval(timestep);
   }
 
   void tumbling_memory(int time_step)
@@ -1304,6 +1536,7 @@ struct particle {
     if (time_step%par.print_skip==0)
     {
       time_el=time_step/par.print_skip;
+      light_log[time_el]=(par.MODULATED>0)?tbr.current_A:par.light_on(time_step);
       for(k=0;k<tbr.Npart;k++)
       {
         x_log[k+time_el*tbr.Npart]=x[k];
@@ -1393,6 +1626,7 @@ struct simulation {
     ret.trate_log = valarray<double> (0.0,tbr.Npart*(par.Nsim/par.print_skip+1));
     ret.phi_log = valarray<double> (0.0,tbr.Npart*(par.Nsim/par.print_skip+1));
     ret.state_log = valarray<double> (0.0,tbr.Npart*(par.Nsim/par.print_skip+1));
+    ret.light_log = valarray<double> (1.0,par.Nsim/par.print_skip+1);
     ret.pot = valarray<double> (0.0,par.Nsim+1);
     ret.vir = valarray<double> (0.0,par.Nsim+1);
 
@@ -1716,6 +1950,26 @@ struct simulation {
       filename+="_smod_tau"+to_string(par.S_tau)+"_gam"+to_string(par.S_gamma)+"_st"+to_string(par.S_st)+"_stot"+to_string(par.S_stot);
     if (par.ABP_model==1)
       filename+="_abp_torque"+to_string(par.ABP_torque_fac);
+    if (par.PULSED>0)
+    {
+      filename+="_puls"+to_string(par.light_on_time)+"on"+to_string(par.light_off_time)+"off";
+      if (par.pulse_start_time>0)
+        filename+="_dly"+to_string(par.pulse_start_time);
+      if (par.LIGHT_START_OFF>0)
+        filename+="_stoff";
+      if (par.dark_tbr>=0)
+        filename+="_dtbr"+to_string(par.dark_tbr);
+    }
+    if (par.seed_offset>0)
+      filename+="_seed"+to_string(par.seed_offset);
+    if (par.print_skip_exp>0)
+      filename+="_pse"+to_string(par.print_skip_exp);
+    if (par.MODULATED>0)
+      filename+="_mod"+to_string(par.modulation_id);
+    if (par.t_stop>0)
+      filename+="_ts"+to_string(par.t_stop);
+    if (par.log_interval>0)
+      filename+="_li"+to_string(par.log_interval);
     if (par.sub_dist>.51 || par.sub_dist<.49)
       filename+="_sub_dist"+to_string(par.sub_dist);
     if (par.Nlevel!=18)
@@ -1740,7 +1994,7 @@ struct simulation {
     {
       for (k=0;k<tbr.Npart;k++)
       {
-        file_out << par.dt*i*par.print_skip << " " << k << " " << part.x_log[k+i*tbr.Npart] << " " << part.y_log[k+i*tbr.Npart] << " " << part.phi_log[k+i*tbr.Npart] << " " << part.trate_log[k+i*tbr.Npart] << " " << part.state_log[k+i*tbr.Npart] << endl;
+        file_out << par.dt*i*par.print_skip << " " << k << " " << part.x_log[k+i*tbr.Npart] << " " << part.y_log[k+i*tbr.Npart] << " " << part.phi_log[k+i*tbr.Npart] << " " << part.trate_log[k+i*tbr.Npart] << " " << part.state_log[k+i*tbr.Npart] << " " << part.light_log[i] << endl;
       }    
     }
   
@@ -1802,6 +2056,26 @@ struct simulation {
       filename+="_smod_tau"+to_string(par.S_tau)+"_gam"+to_string(par.S_gamma)+"_st"+to_string(par.S_st)+"_stot"+to_string(par.S_stot);
     if (par.ABP_model==1)
       filename+="_abp_torque"+to_string(par.ABP_torque_fac);
+    if (par.PULSED>0)
+    {
+      filename+="_puls"+to_string(par.light_on_time)+"on"+to_string(par.light_off_time)+"off";
+      if (par.pulse_start_time>0)
+        filename+="_dly"+to_string(par.pulse_start_time);
+      if (par.LIGHT_START_OFF>0)
+        filename+="_stoff";
+      if (par.dark_tbr>=0)
+        filename+="_dtbr"+to_string(par.dark_tbr);
+    }
+    if (par.seed_offset>0)
+      filename+="_seed"+to_string(par.seed_offset);
+    if (par.print_skip_exp>0)
+      filename+="_pse"+to_string(par.print_skip_exp);
+    if (par.MODULATED>0)
+      filename+="_mod"+to_string(par.modulation_id);
+    if (par.t_stop>0)
+      filename+="_ts"+to_string(par.t_stop);
+    if (par.log_interval>0)
+      filename+="_li"+to_string(par.log_interval);
     if (par.sub_dist>.51 || par.sub_dist<.49)
       filename+="_sub_dist"+to_string(par.sub_dist);
     if (par.Nlevel!=18)
