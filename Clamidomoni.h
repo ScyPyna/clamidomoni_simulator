@@ -102,6 +102,9 @@ struct parameters{
   double modulation_update;
   double t_stop;
   double log_interval;
+  double steer_kappa; //steering toward the light between tumbles, rad/s where |grad tbr| = steer_gmax (0 = off)
+  double D_r_override; //rotational diffusion in rad^2/s replacing the thermal one (0 = thermal)
+  double omega_chiral; //constant rotation between tumbles, rad/s (0 = off)
   long long modulation_update_steps;
   long long pulse_on_steps;
   long long pulse_off_steps;
@@ -138,6 +141,8 @@ struct parameters{
     file_out << " " << PULSED << " " << light_on_time << " " << light_off_time << " " << pulse_start_time << " " << LIGHT_START_OFF << " " << dark_tbr << " " << seed_offset;
     if (MODULATED>0 || t_stop>0 || log_interval>0) //only appended when used, so the header of older-style runs is unchanged
       file_out << " " << MODULATED << " " << modulation_id << " " << modulation_update << " " << t_stop << " " << log_interval;
+    if (steer_kappa!=0 || D_r_override>0 || omega_chiral!=0) //only appended when used, as above
+      file_out << " " << steer_kappa << " " << D_r_override << " " << omega_chiral;
     file_out << endl;
     file_out.close();
   }
@@ -162,6 +167,8 @@ struct parameters{
     max_force=144.0/13.0*pow(7.0/26.0,7.0/6.0)*LJepsilon;
     D=kBT/gamma1;
     D_r=kBT/beta1;
+    if (D_r_override>0) //measured angular noise instead of the thermal one
+      D_r=D_r_override;
 
     Bt=sqrt(2*D*dt);
     Br=sqrt(2*D_r*dt);
@@ -341,6 +348,25 @@ struct tumbles {
   vector<double> fR_energy, fR_tbr;
   vector<double> mod_t, mod_A;
   double current_A=1.0;
+  double steer_gmax=0; //normalization of the steering term, set only when steer_kappa != 0
+
+  void compute_steer_gmax() //99.9th percentile of |grad tbr| over the map, measured across one particle diameter like tratex/tratey
+  {
+    int nx, ny, h=max(1,(int)lround(0.5/pixel_size));
+    double gx, gy;
+    vector<double> g(Nx*Ny);
+    for (nx=0;nx<Nx;nx++)
+      for (ny=0;ny<Ny;ny++)
+      {
+        gx=tbr_field_vector[Ny*((nx+h)%Nx)+ny]-tbr_field_vector[Ny*((nx-h+Nx)%Nx)+ny];
+        gy=tbr_field_vector[Ny*nx+(ny+h)%Ny]-tbr_field_vector[Ny*nx+(ny-h+Ny)%Ny];
+        g[Ny*nx+ny]=sqrt(gx*gx+gy*gy);
+      }
+    size_t idx=(size_t)(0.999*(g.size()-1));
+    nth_element(g.begin(), g.begin()+idx, g.end());
+    steer_gmax=g[idx];
+    cout << "Steering: kappa = " << par.steer_kappa << " rad/s at |grad tbr| = gmax = " << steer_gmax << " (99.9th percentile over the map, difference across " << 2*h << " pixels)" << endl;
+  }
   //vector<vector<double>> mot_field;
 
   double fR(double energy) //tumbling rate at a given energy density: linear interpolation, linear extrapolation at the ends (as scipy's slinear + extrapolate in ill_maker.py)
@@ -494,6 +520,8 @@ struct tumbles {
 
       pixel_size/=par.part_diam;
 
+      if (illumination==0 && par.steer_kappa!=0)
+        compute_steer_gmax();
     }
 
     Lx=pixel_size*Nx;
@@ -517,7 +545,10 @@ struct tumbles {
     ofstream file_out(filename, std::ofstream::out | std::ofstream::app);
 
     file_out << Nx << " " << Ny;
-    file_out << " " << avg_intensity << " " << avg_tbr << " " << pixel_size << " " << Npart << " " << Ncellx << " " << Ncelly << " " << Nmaxpercell <<  endl;
+    file_out << " " << avg_intensity << " " << avg_tbr << " " << pixel_size << " " << Npart << " " << Ncellx << " " << Ncelly << " " << Nmaxpercell;
+    if (par.steer_kappa!=0) //only appended when used
+      file_out << " " << steer_gmax;
+    file_out << endl;
     file_out.close();
   }
 
@@ -1721,6 +1752,10 @@ struct simulation {
           part.phi[k] = (uni_distribution(mt)-.5)*2*PI;
         else //Otherwise, normal Euler-Maruyama step, Br=sqrt(2*D_r*dt);
           part.phi[k]=part.phi[k]+norm_distribution(mt)*par.Br; 
+          if (par.steer_kappa!=0 && tbr.steer_gmax>0) //steering toward the light: kappa*sin(theta)*|grad tbr|/gmax, gradient from the last tumbling_handler
+            part.phi[k]+=par.steer_kappa*(cos(part.phi_old[k])*part.tratey[k]-sin(part.phi_old[k])*part.tratex[k])/tbr.steer_gmax*par.dt;
+          if (par.omega_chiral!=0) //constant rotation (chirality)
+            part.phi[k]+=par.omega_chiral*par.dt;
       }
       else
       {
@@ -1970,6 +2005,12 @@ struct simulation {
       filename+="_ts"+to_string(par.t_stop);
     if (par.log_interval>0)
       filename+="_li"+to_string(par.log_interval);
+    if (par.steer_kappa!=0)
+      filename+="_steer"+to_string(par.steer_kappa);
+    if (par.D_r_override>0)
+      filename+="_Dr"+to_string(par.D_r_override);
+    if (par.omega_chiral!=0)
+      filename+="_chir"+to_string(par.omega_chiral);
     if (par.sub_dist>.51 || par.sub_dist<.49)
       filename+="_sub_dist"+to_string(par.sub_dist);
     if (par.Nlevel!=18)
@@ -2076,6 +2117,12 @@ struct simulation {
       filename+="_ts"+to_string(par.t_stop);
     if (par.log_interval>0)
       filename+="_li"+to_string(par.log_interval);
+    if (par.steer_kappa!=0)
+      filename+="_steer"+to_string(par.steer_kappa);
+    if (par.D_r_override>0)
+      filename+="_Dr"+to_string(par.D_r_override);
+    if (par.omega_chiral!=0)
+      filename+="_chir"+to_string(par.omega_chiral);
     if (par.sub_dist>.51 || par.sub_dist<.49)
       filename+="_sub_dist"+to_string(par.sub_dist);
     if (par.Nlevel!=18)

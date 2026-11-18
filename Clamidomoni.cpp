@@ -157,6 +157,13 @@ parameters read_parameters() //reads parameters
   read_optional(config, "modulation_update", ret.modulation_update);
   read_optional(config, "t_stop", ret.t_stop);
   read_optional(config, "log_interval", ret.log_interval);
+  //known steering, angular noise and chirality for testing the trajectory analysis: 0 keeps the original model
+  ret.steer_kappa=0.0;
+  ret.D_r_override=0.0;
+  ret.omega_chiral=0.0;
+  read_optional(config, "steer_kappa", ret.steer_kappa);
+  read_optional(config, "D_r_override", ret.D_r_override);
+  read_optional(config, "omega_chiral", ret.omega_chiral);
 
   ret.update_parameters();
 

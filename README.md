@@ -360,6 +360,29 @@ used, and `ill_maker.py` needs no change.
 
 ---
 
+# 15. Steering, Angular Noise and Chirality (testing keys)
+
+Three optional keys added on 2026-11-18 to test the trajectory analysis against a known ground truth.
+All default to 0, which keeps the original model: with the keys absent or 0 the logs are byte-identical
+to the previous build.
+
+### `steer_kappa : 0.0`
+
+Continuous steering towards the light gradient between tumbles, in **rad/s**:
+`phi += steer_kappa * (cos(phi)*tratey - sin(phi)*tratex) / gmax * dt`, i.e. kappa · sin(theta) · |grad tbr| / gmax.
+`gmax` is the 99.9th percentile of |grad tbr| on the map (difference across 10 pixels, one cell diameter);
+it is printed at start and appended to header line 2. Measured response: 0.92 of nominal (particle stencil).
+
+### `D_r_override : 0.0`
+
+If non-zero, replaces the thermal rotational diffusion D_r (0.00115 rad²/s) in `Br`, in **rad²/s**.
+
+### `omega_chiral : 0.0`
+
+Constant chiral rotation between tumbles, `phi += omega_chiral * dt`, in **rad/s**.
+
+---
+
 # Summary of Modeling Modes
 
 | Mode                       | Description                       |
