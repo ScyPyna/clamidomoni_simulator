@@ -12,6 +12,9 @@ tbr_fields/**
 *.dSYM
 *.png
 Clamidomoni
+/clamidomoni
+/clamidomoni_*
+/clamidomoni.*
 
 #useless .py
 poisson_test.py

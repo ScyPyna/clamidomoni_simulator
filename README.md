@@ -1,3 +1,81 @@
+# Clamidomoni: fork with pulsed, modulated and speckle light
+
+Fork of [Davidelama/Clamidomoni](https://github.com/Davidelama/Clamidomoni). The model is the same; this fork adds
+light that changes in time, a settable seed, and the map makers of its two main campaigns, pulsed light and speckle
+light. Only the simulator and what is needed to build its input maps are versioned here: analysis scripts and
+simulation output are not. The parameter reference of the original README follows below (sections 1–16).
+
+## What the fork adds to the simulator
+
+Every new key is optional. With a key absent (or 0) the simulator behaves as before.
+
+| Keys | What they do | Section |
+|---|---|---|
+| `seed_offset` | Shifts the random seed: the RNG gets `seed_offset + sim_number`. Without it, with `NperCore : 1` every run uses seed 0, so "different seeds" give identical runs. | 16 |
+| `PULSED`, `light_on_time`, `light_off_time`, `pulse_start_time`, `LIGHT_START_OFF`, `dark_tbr` | Light switched on and off in cycles. | 14 |
+| `MODULATED`, `modulation_id`, `modulation_update` | Light map multiplied by a smooth A(t) read from `modulation.txt`. | 16 |
+| `t_stop`, `log_interval`, `print_skip_exp` | Run length and frame interval in seconds, instead of powers of `Nblock`. | 16 |
+| `steer_kappa`, `D_r_override`, `omega_chiral` | Known steering, rotational noise and chirality, to test trajectory analyses. | 15 |
+
+## Layout and scripts
+
+```text
+Clamidomoni.cpp, Clamidomoni.h, rapidyaml.h   the simulator
+parameters_multi.yaml                         default parameters (continuous light)
+inputSimulations/                             ring maps: profiles, calibration and the scripts that build the maps
+pulsed/                                       pulsed light: example parameters
+pulsed/modulated/                             modulated light: flat rings, A(t) curves, example parameters
+speckle/                                      speckle light: map maker, example parameters
+```
+
+**`inputSimulations/`** (run the scripts from the repository root: their paths start with `inputSimulations/`)
+
+| File | What it does |
+|---|---|
+| `ill_maker.py` | Original map maker. From a radial profile `radialEnergyDensityMap[_large_ring]_<P>µW_good.txt` it builds the 2D light map of a radially symmetric ring and, through `tumblingVsEnergyDensity.txt`, its tumbling-rate map. Settings at the top of the file: `intensity` and `newint` (µW), `large`, `linear`. Writes `tbr_fields/ill_map*.dat` and `tbr_fields/tbr_map*.dat`. |
+| `linearizer.py` | Original. Makes the linear-profile version of the small ring (`linearEnergyDensityMap_180µW_good.txt`, plus the S-model one), which `ill_maker.py` reads with `linear=True`. Inputs: `illumination_lin_180µW.tiff`, `fluoTest2.tiff`, `radialEnergyDensityMap_180µW.txt`. |
+| `lab_maps.py` | Maps from the lab's own illumination images, one TIFF per session (`SESSIONS` at the top), scaled to that session's power. Unlike the earlier profile extraction, it finds the ring centre in the image (rings are off-centre by up to ~80 px), subtracts the camera background and averages over all angles. Writes `tbr_fields_lab/ill<S>/{ill,tbr}_map_ring_<P>muW.dat`: set `power_input : P` and point the run's `tbr_fields/` to that folder. Paths to set at the top: `BASE`, `TIFFS`, `TUMB`. |
+| `tumblingVsEnergyDensity.txt` | Calibration f_R(I): tumbling rate against light energy density. Every map maker reads it. For `MODULATED` runs, copy it into the run's `tbr_fields/` as well. |
+| `radialEnergyDensityMap_180µW_good.txt` | Radial profile of the small ring, 180 µW (the ring of the pulsed grid). |
+| `radialEnergyDensityMap_large_ring_610µW_good.txt` | Radial profile of the large ring, 610 µW. |
+| `radialEnergyDensityMap_180µW.txt`, `illumination_lin_180µW.tiff`, `fluoTest2.tiff` | Inputs of `linearizer.py`. |
+
+**`pulsed/`**
+
+| File | What it does |
+|---|---|
+| `parameters_pulsed_example.yaml` | A real run of the pulsed grid: small ring at 180 µW, τ_m = 16 s (`time_mem 160000` steps of 1e-4 s), 10 s on and 5 s off, 7 min (`t_stop 420`), one frame every 0.1 s. Maps from `inputSimulations/ill_maker.py`, or from `lab_maps.py` for lab rings. Its `v_drift_*` keys are not read by this simulator and do nothing. |
+| `modulated/mod_maps.py` | Five flat rings for modulated light: inner radius 150 µm, outer radius 245, 290, 335, 380 or 420 µm, plateau 1.1e-4 µW/µm² with soft (erf) edges, so the ring size is the only geometric variable. Writes `tbr_fields_mod/rout<R>/{ill,tbr}_map_ring_<P>muW.dat`. Paths at the top: `BASE`, `TUMB`, `OUTD`. |
+| `modulated/make_modulated.py` | Builds the run folders of the modulated dataset (5000 runs). Each run gets its own A(t) on 0–120 s every 0.1 s: a Gaussian process with a random correlation time, squashed to [0, 1] and starting from 1, written to `<run>/modulation.txt`; rings assigned as `id % 5`; τ_m 10 s; `seed_offset = id`. Paths at the top: `BASE`, `OUT`. |
+| `modulated/parameters_modulated_example.yaml` | Run 0 of that dataset: ring with outer radius 245 µm, τ_m 10 s, map rebuilt every 0.1 s, 120 s. |
+
+**`speckle/`**
+
+| File | What it does |
+|---|---|
+| `speckle_ill_maker.py` | Speckle light maps on the simulation grid, replacing `ill_maker.py` for speckle. The field is fully developed speckle (exponential intensity at every grain size) and exactly periodic. The grain size ξ is the FWHM of the intensity autocorrelation. The map is normalised to a mean energy density (`--mean-int`, default 3.4e-5 µW/µm²). Options: `--grains` (µm), `--realisations`, `--match-peak`, `--homogeneous` (uniform control), `--outroot`. Writes `<outroot>/xi<ξ>_m<k>/{ill,tbr}_map_ring_<ξ>muW.dat` and `map_stats.json`. |
+| `parameters_speckle_example.yaml` | ξ = 40 µm, realisation 0, τ_m 16 s, 15 min. Here `power_input` is the grain size: it only selects the map file (`..._40muW.dat`); the intensity is set by the map itself. |
+
+## Running
+
+```bash
+g++ -O3 -std=c++17 -pthread Clamidomoni.cpp -o clamidomoni
+python3 inputSimulations/ill_maker.py     # writes tbr_fields/ (run from the repository root)
+./clamidomoni                             # reads parameters_multi.yaml and tbr_fields/ in the working directory, writes logs/
+```
+
+Each run normally gets its own folder with `parameters_multi.yaml`, a `tbr_fields/` folder or link, and `logs/`.
+
+## History
+
+- `main`: the original commits by Davide Lama; the PINN work of June 2026 (moved to a separate repository; its
+  files only remain in the history); pulsed and modulated light (`6c0c997`); the steering keys.
+- Tag `pinn-ring-dataset-2026-07`: the simulator that made the PINN ring datasets of July 2026. It takes the seed
+  from the command line (`./clamidomoni <seed>`, folded in as `sim_number += seed*10000`) and has `v_drift_x/y`.
+  The main branch handles the seed with `seed_offset` instead.
+
+---
+
 # Simulation of Unicellular Algae in Structured Light Fields
 
 This repository contains a simulation framework for modeling unicellular algae moving in externally imposed light fields. The model supports run-and-tumble dynamics, quorum sensing, memory effects, gradient sensing, collision-induced tumbling, and an alternative Active Brownian Particle (ABP) model.
@@ -380,6 +458,41 @@ If non-zero, replaces the thermal rotational diffusion D_r (0.00115 rad²/s) in 
 ### `omega_chiral : 0.0`
 
 Constant chiral rotation between tumbles, `phi += omega_chiral * dt`, in **rad/s**.
+
+---
+
+# 16. Seed, Modulated Light and Run Length
+
+### `seed_offset : 0`
+
+Added to the random seed of every run (the RNG gets `seed_offset + sim_number`; `sim_number` stays the index used
+to average the moments). Appended to the log name as `_seed<N>` when larger than 0.
+
+### `MODULATED : 0`
+
+`1` multiplies the light map by a time-dependent factor A(t). The simulator reads `modulation.txt` from the working
+directory (two columns: time in s, A) and `tbr_fields//tumblingVsEnergyDensity.txt`, and rebuilds the tumbling map
+as f_R(A·I) every `modulation_update` seconds.
+
+### `modulation_id : 0`
+
+Label of the A(t) curve, appended to the log name as `_mod<id>`.
+
+### `modulation_update : 0.1`
+
+Interval, in seconds, between two rebuilds of the tumbling map.
+
+### `t_stop : 0.0`
+
+Run length in seconds. `0` keeps the `Nblock^Nlevel` steps.
+
+### `log_interval : 0.0`
+
+Seconds between two logged frames. `0` keeps `print_skip_exp` or the default (2048 frames). Do not set both.
+
+### `print_skip_exp : 0`
+
+Logs every `Nblock^print_skip_exp` steps instead of the default.
 
 ---
 
