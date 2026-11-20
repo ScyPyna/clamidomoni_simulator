@@ -26,7 +26,7 @@ from scipy.ndimage import gaussian_filter1d
 
 BASE  = Path("/home/user/Scrivania/pulsed_simulation")
 TIFFS = Path("/home/user/Scaricati/illuminationTiffs")
-TUMB  = Path("/home/user/Scrivania/clamidomoni_simulator-main/inputSimulations/tumblingVsEnergyDensity.txt")
+TUMB  = Path(__file__).resolve().parent/"tumblingVsEnergyDensity.txt"   # calibration file next to this script
 OUTD  = BASE/"tbr_fields_lab"
 PIX   = 1.041667            # um per pixel, camera and simulation grid
 NRAD  = 821                 # radial samples: gives the same 1159 x 1159 map as ring_180muW
