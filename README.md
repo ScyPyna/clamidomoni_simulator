@@ -68,9 +68,11 @@ Each run normally gets its own folder with `parameters_multi.yaml`, a `tbr_field
 
 ## History
 
-- `main`: the original commits by Davide Lama; the PINN work of June 2026 (moved to a separate repository; its
-  files only remain in the history); pulsed and modulated light (`6c0c997`); the steering keys.
-- Tag `pinn-ring-dataset-2026-07`: the simulator that made the PINN ring datasets of July 2026. It takes the seed
+- `main`: the original commits by Davide Lama; the ring simulations of May–June 2026 and their analysis code (moved
+  out of this repository; those files only remain in the history); pulsed and modulated light (`6c0c997`); the
+  steering keys.
+- Tag `ring-2026-07`: the simulator of the July 2026 ring simulations (continuous light on the small 180 µW and the
+  large 610 µW ring, 15 values of τ_m × 10 seeds, `Nlevel 19`). It takes the seed
   from the command line (`./clamidomoni <seed>`, folded in as `sim_number += seed*10000`) and has `v_drift_x/y`.
   The main branch handles the seed with `seed_offset` instead.
 
